@@ -175,7 +175,10 @@ class mido_admins(commands.Cog):
                     excs += f"{cog} → {exc}\n"
 
             await ctx.message.add_reaction(self.success)
-            return await util.reply_or_send(ctx, content=f"> Failed to reload(s) \n```\n{excs}\n```")
+            
+            if execs:
+                await util.reply_or_send(ctx, content=f"> Failed to reload(s) \n```\n{excs}\n```")
+            return
         else:
             try:
                 self.bot.reload_extension(module)
