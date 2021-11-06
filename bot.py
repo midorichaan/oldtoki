@@ -6,12 +6,13 @@ import config
 import datetime
 import logging
 import traceback
-from lib import util
+from lib import util, database
 
 bot = commands.Bot(command_prefix=config.PREFIX, intents=discord.Intents.all(), status=discord.Status.idle)
 
 bot.config = __import__("config")
 bot.color = config.COLOR
+bot.db = database.Database()
 bot._ext = ["cogs.mido_admins", "jishaku"]
 bot.session = aiohttp.ClientSession()
 bot.uptime = datetime.datetime.now()
