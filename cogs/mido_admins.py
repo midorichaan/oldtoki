@@ -176,7 +176,7 @@ class mido_admins(commands.Cog):
 
             await ctx.message.add_reaction(self.success)
             
-            if execs != "":
+            if excs != "":
                 await util.reply_or_send(ctx, content=f"> Failed to reload(s) \n```\n{excs}\n```")
             return
         else:
