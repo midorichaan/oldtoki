@@ -4,6 +4,7 @@ from discord.ext import commands
 import asyncio
 import io
 import textwrap
+import traceback
 from contextlib import redirect_stdout
 from lib import util
 
