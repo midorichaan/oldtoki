@@ -6,8 +6,8 @@ import config
 
 class Database:
     def __init__(
-        self, *, host: str = config.ADDRESS, port: int = config.PORT,
-            user: str = config.USER_NAME, password: str = config.PASSWORD, db: str = config.DB_NAME) -> None:
+        self, *, host: str = config.DB_ADDRESS, port: int = config.DB_PORT,
+            user: str = config.DB_USER, password: str = config.DB_PASSWD, db: str = config.DB_NAME) -> None:
         self.host: str = host
         self.port: int = port
         self.user: str = user
