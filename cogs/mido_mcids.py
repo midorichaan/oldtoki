@@ -34,7 +34,7 @@ class mido_mcids(commands.Cog):
                 return await m.edit(content=f"> エラー \n```py\n{exc}\n```")
             else:
                 await self.bot.db.execute("UPDATE mcids SET mcid=%s, uuid=%s WHERE user_id=%s", (data["name"], data["id"], ctx.author.id))
-                return await m.edit(content=f"> `{mcid}`で再登録したよ！")
+                return await m.edit(content=f"> あなたのMCIDを`{mcid}`で再登録したよ！")
         else:
             try:
                 data = await util.resolve_mcid(ctx, mcid=mcid)
@@ -42,7 +42,7 @@ class mido_mcids(commands.Cog):
                 return await m.edit(content=f"> エラー \n```py\n{exc}\n```")
             else:
                 await self.bot.db.execute("INSERT INTO mcids VALUES(%s, %s, %s)", (ctx.author.id, data["name"], data["id"]))
-                return await m.edit(content=f"> `{mcid}`で登録したよ！")
+                return await m.edit(content=f"> あなたのMCIDを`{mcid}`で登録したよ！")
 
 def setup(bot):
     bot.add_cog(mido_mcids(bot))
