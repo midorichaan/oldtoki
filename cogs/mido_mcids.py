@@ -29,7 +29,7 @@ class mido_mcids(commands.Cog):
         d = await self.bot.db.fetchone("SELECT * FROM mcids WHERE user_id=%s", (ctx.author.id,))
         if d:
             try:
-                data = await util.resolve_mcid(ctx, mcid)
+                data = await util.resolve_mcid(ctx, mcid=mcid)
             except Exception as exc:
                 return await m.edit(content=f"> エラー \n```py\n{exc}\n```")
             else:
