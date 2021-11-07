@@ -2,6 +2,13 @@ import asyncio
 import subprocess
 import uuid
 
+from discord.ext import commands
+from . import mido_util
+
+class MemberConverter(commands.Converter):
+    async def convert(ctx, argument):
+        return await mido_util.FetchUserConverter().convert(ctx, argument)
+
 #MinecraftConverter
 class MinecraftConverter:
     async def convert(self, ctx, value):
