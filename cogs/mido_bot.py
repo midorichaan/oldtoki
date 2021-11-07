@@ -3,6 +3,7 @@ from discord.ext import commands
 
 import platform
 import psutil
+import time
 
 from lib import util
 
