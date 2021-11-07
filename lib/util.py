@@ -6,7 +6,7 @@ from discord.ext import commands
 from . import mido_util
 
 class MemberConverter(commands.Converter):
-    async def convert(ctx, argument):
+    async def convert(self, ctx, argument):
         return await mido_util.FetchUserConverter().convert(ctx, argument)
 
 #MinecraftConverter
