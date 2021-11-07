@@ -1,13 +1,15 @@
 import discord
 from discord.ext import commands
 
+import asyncio
+
 from lib import util
 
 class mido_mcids(commands.Cog):
     
     def __init__(self, bot):
         self.bot = bot
-        bot.loop.create_task(self.setup_db)
+        asyncio.gather(self.setup_db())
     
     async def setup_db(self):
         await self.bot.wait_until_ready()
