@@ -1,5 +1,33 @@
 import asyncio
 import subprocess
+import uuid
+
+#MinecraftConverter
+class MinecraftConverter:
+    async def convert(self, ctx, value):
+        try:
+            id = uuid.UUID(value)
+        except:
+            async with ctx.bot.session.get(f"https://api.mojang.com/users/profiles/minecraft/{value}") as resp:
+                if resp.status == 204:
+                    raise ValueError("ユーザーが見つかりません")
+                elif resp.status == 200:
+                    return await resp.json()
+                else:
+                    raise ValueError("ユーザー名の検証中にエラーが発生しました")
+        else:
+            async with ctx.bot.session.get(f"https://api.mojang.com/user/profile/{id.hex}") as resp:
+                if resp.status == 204:
+                    raise ValueError("UUIDが見つかりません")
+                elif resp.status == 200:
+                    return await resp.json()
+                else:
+                    raise ValueError("UUIDの検証中にエラーが発生しました")
+
+#resolve_mcid
+async def resolve_mcid(ctx, *, mcid):
+    cls = MinecraftConverter()
+    return await cls.convert(ctx, mcid)
 
 #reply_or_send
 async def reply_or_send(ctx, *args, **kwargs):
