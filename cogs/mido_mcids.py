@@ -37,7 +37,7 @@ class mido_mcids(commands.Cog):
                 return await m.edit(content=f"> `{mcid}`で再登録したよ！")
         else:
             try:
-                data = await util.resolve_mcid(ctx, mcid)
+                data = await util.resolve_mcid(ctx, mcid=mcid)
             except Exception as exc:
                 return await m.edit(content=f"> エラー \n```py\n{exc}\n```")
             else:
