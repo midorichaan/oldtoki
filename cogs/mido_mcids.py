@@ -43,6 +43,20 @@ class mido_mcids(commands.Cog):
             else:
                 await self.bot.db.execute("INSERT INTO mcids VALUES(%s, %s, %s)", (ctx.author.id, data["name"], data["id"]))
                 return await m.edit(content=f"> あなたのMCIDを`{mcid}`で登録したよ！")
+    
+    #show
+    @commands.command(name="show", description="登録しているMCIDを表示します", usage="show [Member/User]")
+    async def show(self, ctx, target: util.MemberConverter=None):
+        m = await util.reply_or_send(ctx, content="> 処理中...")
+        
+        if not target:
+            target = ctx.author
+        
+        db = await self.bot.db.fetchone("SELECT * FROM mcids WHERE user_id=%s", (target.id,))
+        if not db:
+            return await m.edit(content=f"> {target}のMCIDは登録されてないよ！")
+        else:
+            return await m.edit(content=f"> {target} のMCID登録情報 \nMCID: {db['mcid']} \nUUID: {db['uuid']}")
 
 def setup(bot):
     bot.add_cog(mido_mcids(bot))
