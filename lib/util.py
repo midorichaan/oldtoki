@@ -7,7 +7,10 @@ from . import mido_util
 
 class MemberConverter(commands.Converter):
     async def convert(self, ctx, argument):
-        return await mido_util.FetchUserConverter().convert(ctx, argument)
+        try:
+            return await mido_util.FetchUserConverter().convert(ctx, argument)
+        except:
+            return None
 
 #MinecraftConverter
 class MinecraftConverter:
