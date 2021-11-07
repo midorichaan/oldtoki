@@ -12,7 +12,7 @@ class mido_help(commands.Cog):
             self.bot.remove_command("help")
     
     #generate_help
-    def generate_help(self):
+    def generate_help(self, ctx):
         e = discord.Embed(title="Help Menu", description="", color=self.bot.color, timestamp=ctx.message.created_at)
         e.description = """
         HelpMenuはリアクションで進行します。
@@ -49,14 +49,14 @@ class mido_help(commands.Cog):
         m = await util.reply_or_send(ctx, content="> 処理中...")
         
         if not command:
-            embeds = self.generate_help()
+            embeds = self.generate_help(ctx)
             page = paginator.EmbedPaginator(ctx, entries=embeds, timeout=30.0)
             return await page.paginate()
         else:
             c = self.bot.get_command(command)
             
             if not c:
-                embeds = self.generate_help()
+                embeds = self.generate_help(ctx)
                 page = paginator.EmbedPaginator(ctx, entries=embeds, timeout=30.0)
                 return await page.paginate()
             else:
