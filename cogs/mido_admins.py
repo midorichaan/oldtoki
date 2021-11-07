@@ -62,6 +62,23 @@ class mido_admins(commands.Cog):
                 self._ = ret
                 await util.reply_or_send(ctx, content=f'```py\n{value}{ret}\n```')
     
+    #sql
+    @commands.is_owner()
+    @commands.command(name="sql", description="[運営用]SQLコマンドを実行します", usage="sql <command>")
+    async def sql(self, ctx, *, sql=None):
+        if not sql:
+            await ctx.message.add_reaction(self.failed)
+            return await util.reply_or_send(ctx, content="> 実行するSQL文を入力してね！")
+       
+        ret = await self.bot.db.fetchall(sql)
+        
+        try:
+            await ctx.message.add_reaction(self.success)
+            return await util.reply_or_send(ctx, content=ret)   
+        except Exception as exc:
+            await ctx.message.add_reaction(self.failed)
+            return await util.reply_or_send(ctx, content=f"```py\n{exc}\n```")
+    
     #shell
     @commands.is_owner()
     @commands.command(name="shell", aliases=["sh"], description="[運営用]シェルコマンドを実行します", usage="shell <command>")
