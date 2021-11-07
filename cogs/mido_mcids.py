@@ -10,6 +10,7 @@ class mido_mcids(commands.Cog):
         bot.loop.create_task(self.setup_db)
     
     async def setup_db(self):
+        await self.bot.wait_until_ready()
         tables = [i.values() for i in await self.bot.db.fetchall("SHOW TABLES")]
         
         if not "mcids" in tables:
