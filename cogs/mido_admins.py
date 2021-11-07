@@ -192,10 +192,15 @@ class mido_admins(commands.Cog):
     @commands.is_owner()
     @system.command(name="restart", aliases=["reboot"], description="[運営用]Botを再起動します。", usage="restart")
     async def reboot(self, ctx):
-        await util.reply_or_send(ctx, content="> Botを再起動します...しばらくお待ちください...")
+        msg = await util.reply_or_send(ctx, content="> Botを再起動します...しばらくお待ちください...")
         await self.bot.change_presence(activity=discord.Game(name=f'disabling tokibot... Please Wait...'))
         await asyncio.sleep(3)
-        await self.bot.close()
+        
+        try:
+            await util.run_process(ctx, "python3 bot.py")
+            await self.bot.close()
+        except Exception as exc:
+            await msg.edit(content=f"> エラー \n```py\n{exc}\n```")
     
     #toggle
     @commands.is_owner()
