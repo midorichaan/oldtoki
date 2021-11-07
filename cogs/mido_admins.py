@@ -197,7 +197,6 @@ class mido_admins(commands.Cog):
         await asyncio.sleep(3)
         
         try:
-            await util.run_process(ctx, "python3 bot.py")
             await self.bot.close()
         except Exception as exc:
             await msg.edit(content=f"> エラー \n```py\n{exc}\n```")
