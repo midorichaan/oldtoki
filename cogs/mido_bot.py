@@ -21,7 +21,6 @@ class mido_bot(commands.Cog):
         ws = round(self.bot.latency * 1000, 2)
         
         await m.edit(content=f"ぽんぐっ！🏓 \nPing: {ping}ms \nWebSocket: {ws}ms")
-        return await msg.edit(embed=e)
     
     #debug
     @commands.command(name="debug", aliases=["dbg"], description="Botのデバッグ情報を表示します。", usage="debug")
