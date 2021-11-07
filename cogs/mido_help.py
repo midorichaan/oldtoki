@@ -61,9 +61,9 @@ class mido_help(commands.Cog):
                 return await page.paginate()
             else:
                 e = discord.Embed(title=f"Help - {c.name}", color=self.bot.color, timestamp=ctx.message.created_at)
-                e.add_field(name="説明", value=c.description)
-                e.add_field(name="使用例", value=c.usage)
-                e.add_field(name="エイリアス", value=", ".join([f"`{row}`" for row in c.aliases]))
+                e.add_field(name="説明", value=c.description or "なし。")
+                e.add_field(name="使用例", value=c.usage or "なし。")
+                e.add_field(name="エイリアス", value=", ".join([f"`{row}`" for row in c.aliases]) or "なし。")
                 return await m.edit(content=None, embed=e)
         
 def setup(bot):
