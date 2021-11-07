@@ -28,6 +28,7 @@ async def close_handler():
     except:
         pass
     
+    await bot.change_presence(activity=None, status=discord.Status.offline)
     await bot._default_close()
     
 bot.close = close_handler
