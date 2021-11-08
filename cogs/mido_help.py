@@ -51,6 +51,7 @@ class mido_help(commands.Cog):
         if not command:
             embeds = self.generate_help(ctx)
             page = paginator.EmbedPaginator(ctx, entries=embeds, timeout=30.0)
+            await m.delete()
             return await page.paginate()
         else:
             c = self.bot.get_command(command)
@@ -58,6 +59,7 @@ class mido_help(commands.Cog):
             if not c:
                 embeds = self.generate_help(ctx)
                 page = paginator.EmbedPaginator(ctx, entries=embeds, timeout=30.0)
+                await m.delete()
                 return await page.paginate()
             else:
                 e = discord.Embed(title=f"Help - {c.name}", color=self.bot.color, timestamp=ctx.message.created_at)
