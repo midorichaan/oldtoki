@@ -48,16 +48,13 @@ class TextPaginator:
     async def paginate(self):
         msg = await self.ctx.send(self.pages[self.page])
         
-        tasks = []
-        tasks.append(msg.add_reaction('⏮'))
-        tasks.append(msg.add_reaction('◀'))
-        tasks.append(msg.add_reaction('⏹️'))
-        tasks.append(msg.add_reaction('▶'))
-        tasks.append(msg.add_reaction('⏭️'))
-        tasks.append(msg.add_reaction('🔢'))
-        
-        asyncio.gather(*tasks)
-        
+        await msg.add_reaction('⏮')
+        await msg.add_reaction('◀')
+        await msg.add_reaction('⏹️')
+        await msg.add_reaction('▶')
+        await msg.add_reaction('⏭️')
+        await msg.add_reaction('🔢')
+         
         def check(reaction, user):
             if reaction.message.id == msg.id and user.id == self.ctx.message.author.id:
                 return True
@@ -194,15 +191,12 @@ class EmbedPaginator:
     async def paginate(self):
         msg = await self.ctx.send(embed=self.entries[self.page])
         
-        tasks = []
-        tasks.append(msg.add_reaction('⏮'))
-        tasks.append(msg.add_reaction('◀'))
-        tasks.append(msg.add_reaction('⏹️'))
-        tasks.append(msg.add_reaction('▶'))
-        tasks.append(msg.add_reaction('⏭️'))
-        tasks.append(msg.add_reaction('🔢'))
-        
-        asyncio.gather(*tasks)
+        await msg.add_reaction('⏮')
+        await msg.add_reaction('◀')
+        await msg.add_reaction('⏹️')
+        await msg.add_reaction('▶')
+        await msg.add_reaction('⏭️')
+        await msg.add_reaction('🔢')
         
         def check(reaction, user):
             if reaction.message.id == msg.id and user.id == self.ctx.message.author.id:
