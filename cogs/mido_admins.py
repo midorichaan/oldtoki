@@ -3,6 +3,7 @@ from discord.ext import commands
 
 import asyncio
 import io
+import os
 import textwrap
 import traceback
 from contextlib import redirect_stdout
@@ -121,7 +122,6 @@ class mido_admins(commands.Cog):
                 e.add_field(name="使用例", value=c.usage)
                 e.add_field(name="説明", value=c.description)
                 e.add_field(name="エイリアス", value=", ".join([f"`{row}`" for row in c.aliases]))
-                e.add_field(name="権限", value=c.brief)
                
                 try:
                    return await util.reply_or_send(ctx, embed=e)
@@ -208,13 +208,14 @@ class mido_admins(commands.Cog):
     #restart
     @commands.is_owner()
     @system.command(name="restart", aliases=["reboot"], description="[運営用]Botを再起動します。", usage="restart")
-    async def reboot(self, ctx):
+    async def restart(self, ctx):
         msg = await util.reply_or_send(ctx, content="> Botを再起動します...しばらくお待ちください...")
         await self.bot.change_presence(activity=discord.Game(name=f'disabling tokibot... Please Wait...'))
         await asyncio.sleep(3)
         
         try:
             await self.bot.close()
+            os.system("python3 bot.py")
         except Exception as exc:
             await msg.edit(content=f"> エラー \n```py\n{exc}\n```")
     
