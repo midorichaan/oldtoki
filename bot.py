@@ -62,7 +62,7 @@ async def on_command(ctx):
 @bot.event
 async def on_command_error(ctx, exc):
     traceback_error = f"```{''.join(traceback.TracebackException.from_exception(exc).format())}```"
-    if len(str(traceback_error)) >= 1024:
+    if len(str(traceback_error)) >= 4000:
         error = f"```py\n{exc}\n```"
     else:
         error = traceback_error
