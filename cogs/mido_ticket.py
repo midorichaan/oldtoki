@@ -73,7 +73,7 @@ class mido_ticket(commands.Cog):
             msg = await channel.send(content=f"{author.mention} →", embed=e)
         
         await msg.pin()
-        await self.db.execute(f"INSERT INTO tickets VALUES(%s, %s, %s, %s)", (channel.id, msg.id, author.id, 2))
+        await self.db.execute(f"INSERT INTO tickets VALUES(%s, %s, %s, %s)", (channel.id, msg.id, author.id, channel.category.id, 2))
         await msg.add_reaction("🔐")
         
         return msg
