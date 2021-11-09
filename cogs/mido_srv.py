@@ -82,7 +82,7 @@ class mido_srv(commands.Cog):
             ctx = await self.bot.get_context(msg)
             if secrets.compare_digest(str(db["verifykey"]), msg.content):
                 await util.reply_or_send(ctx, content=config["verify_message"] or "認証に成功しました！")
-                await guild.get_member(msg.author.id).add_roles(self.verify_role, reason="complete verification")
+                await self.guild.get_member(msg.author.id).add_roles(self.verify_role, reason="complete verification")
                 return await self.bot.db.execute("DELETE FROM verifyqueue WHERE user_id=%s", (msg.author.id,))
             else:
                 return await util.reply_or_send(ctx, content=config["verify_failed_message"] or "認証に失敗しました")
