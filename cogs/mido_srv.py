@@ -95,5 +95,50 @@ class mido_srv(commands.Cog):
         if db:
             await self.bot.db.execute("DELETE FROM verifyqueue WHERE user_id=%s", (member.id,))
     
+    #config
+    @commands.group(name="config", description="認証システムの設定を変更します", usage="config <args>")
+    @commands.check(util.is_staff)
+    async def config(self, ctx):
+        pass
+    
+    #config help
+    @config.command(name="help", description="config関連のヘルプを表示します", usage="config help")
+    async def help(self, ctx):
+        m = await util.reply_or_send(ctx, content="> 処理中...")
+        
+        e = discord.Embed(title="Config Help", color=self.bot.color, timestamp=ctx.message.created_at)
+        c = self.bot.get_command("config")
+        
+        for i in c.commands:
+            e.add_field(name=c.usage, value=c.description or "なし")
+        
+        await m.edit(content=None, embed=e)
+            
+    
+    #config verifymsg
+    @config.command(name="verifymsg", description="認証成功/失敗時のメッセージを設定します", usage="config verifymsg <success/failed> <content>")
+    @commands.check(util.is_staff)
+    async def verifymsg(self, ctx, type: str="success", *, content: str=None):
+        m = await util.reply_or_send(ctx, content="> 処理中...")
+        
+        if isinstance(ctx.channel, discord.DMChannel):
+            return await m.edit(content="> DMでは使えないよ！")
+        
+        if not content:
+            return await m.edit(content="> メッセージを入力してね！")
+        
+        db = await self.bot.db.fetchone("SELECT * FROM config WHERE guild_id=%s", (ctx.guild.id,))
+        if not db:
+            return await m.edit(content="> データが見つからなかったよ！")
+        
+        if type == "success":
+            await self.bot.db.execute("UPDATE config SET verify_message=%s WHERE guild_id=%s", (content, ctx.guild.id))
+            return await m.edit(content=f"> メッセージを以下の内容で設定したよ！ \n```\n{content}\n```")
+        elif type == "failed":
+            await self.bot.db.execute("UPDATE config SET verify_failed_message=%s WHERE guild_id=%s", (content, ctx.guild.id))
+            return await m.edit(content=f"> メッセージを以下の内容で設定したよ！ \n```\n{content}\n```")
+        else:
+            return await m.edit(content="> successかfailedを指定してね！")
+    
 def setup(bot):
     bot.add_cog(mido_srv(bot))
