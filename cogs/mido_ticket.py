@@ -58,7 +58,7 @@ class mido_ticket(commands.Cog):
             panel = await self.create_panel(guild, member, ch, reason=reason)
             await ch.send(f"> お問い合わせ内容を送信してください。")
             
-            return channel, panel
+            return ch, panel
     
     #create panel
     async def create_panel(self, guild, author, channel, *, reason):
