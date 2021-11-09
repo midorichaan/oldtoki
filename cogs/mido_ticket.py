@@ -36,29 +36,28 @@ class mido_ticket(commands.Cog):
         asyncio.gather(self.db.execute("CREATE TABLE IF NOT EXISTS ticket_log(id BIGINT PRIMARY KEY NOT NULL, channel BIGINT, author BIGINT, content TEXT)"))
     
     #create_ticket
-    async def create_ticket(self, guild, member, reason):
-        config = await self.db.fetchone("SELECT * FROM ticket_config WHERE guild=%s", (guild.id,))
+    async def create_ticket(self, guild, member, reason, *, config=None):
+        if config is None:
+            config = await self.db.fetchone("SELECT * FROM ticket_config WHERE guild=%s", (guild.id,))
+
         chs = [c for c in guild.channels if str(member.id) in str(c.name)]
-        
-        if len(chs) == 0:
-            ch = await guild.get_channel(config["category"]).create_text_channel(name=f"ticket-{member.id}-1")
-        else:
-            ch = await guild.get_channel(config["category"]).create_text_channel(name=f"ticket-{member.id}-{len(chs)+1}")
-                            
-            overwrite = discord.PermissionOverwrite()
-            overwrite.send_messages = True
-            overwrite.read_messages = True
-            overwrite.add_reactions = True
-            overwrite.embed_links = True
-            overwrite.read_message_history = True
-            overwrite.external_emojis = True
-            overwrite.attach_files = True
-                                
-            await ch.set_permissions(member, overwrite=overwrite)
-            panel = await self.create_panel(guild, member, ch, reason=reason)
-            await ch.send(f"> お問い合わせ内容を送信してください。")
-            
-            return ch, panel
+
+        ch = await guild.get_channel(config["category"]).create_text_channel(name=f"ticket-{member.id}-{len(chs)+1}")
+
+        overwrite = discord.PermissionOverwrite()
+        overwrite.send_messages = True
+        overwrite.read_messages = True
+        overwrite.add_reactions = True
+        overwrite.embed_links = True
+        overwrite.read_message_history = True
+        overwrite.external_emojis = True
+        overwrite.attach_files = True
+
+        await ch.set_permissions(member, overwrite=overwrite)
+        panel = await self.create_panel(guild, member, ch, reason=reason)
+        await ch.send(f"> お問い合わせ内容を送信してください。")
+
+        return ch, panel
     
     #create panel
     async def create_panel(self, guild, author, channel, *, reason):
