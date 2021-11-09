@@ -13,6 +13,7 @@ class mido_help(commands.Cog):
     
     #generate_help
     def generate_help(self, ctx):
+        max_page = 5
         e = discord.Embed(title="Help Menu", description="", color=self.bot.color, timestamp=ctx.message.created_at)
         e.description = """
         HelpMenuはリアクションで進行します。
@@ -24,27 +25,33 @@ class mido_help(commands.Cog):
         ⏭️ - 最後のページに進む
         🔢 - 指定ページに進む
         """
-        e.set_footer(text=f"Page 1 / 4")
+        e.set_footer(text=f"Page 1 / {max_page}")
         
         e1 = discord.Embed(title="Help Menu - Bot Commands", description="", color=self.bot.color, timestamp=ctx.message.created_at)
         cmd = self.bot.cogs["mido_bot"].get_commands()
         cmd.extend(self.bot.cogs["mido_help"].get_commands())
         e1.description = f"".join([f"`{c.name}`, " for c in cmd])
-        e1.set_footer(text=f"Page 2 / 4")
+        e1.set_footer(text=f"Page 2 / {max_page}")
         
         e2 = discord.Embed(title="Help Menu - Minecraft Commands", description="", color=self.bot.color, timestamp=ctx.message.created_at)
         cmd = self.bot.cogs["mido_mcids"].get_commands()
         cmd.extend(self.bot.cogs["mido_mcs"].get_commands())
         e2.description = f"".join([f"`{c.name}`, " for c in cmd])
-        e2.set_footer(text=f"Page 3 / 4")
+        e2.set_footer(text=f"Page 3 / {max_page}")
         
-        e3 = discord.Embed(title="Help Menu - Admin Commands", description="", color=self.bot.color, timestamp=ctx.message.created_at)
+        e3 = discord.Embed(title="Help Menu - Server Commands", description="", color=self.bot.color, timestamp=ctx.message.created_at)
+        cmd = self.bot.cogs["mido_ticket"].get_commands()
+        cmd.extend(self.bot.cogs["mido_srv"].get_commands())
+        e3.description = f"".join([f"`{c.name}`, " for c in cmd])
+        e3.set_footer(text=f"Page 4 / {max_page}")
+        
+        e4 = discord.Embed(title="Help Menu - Admin Commands", description="", color=self.bot.color, timestamp=ctx.message.created_at)
         cmd = self.bot.cogs["mido_admins"].get_commands()
         cmd.append(self.bot.get_command("jishaku"))
-        e3.description = f"".join([f"`{c.name}`, " for c in cmd])
-        e3.set_footer(text=f"Page 4 / 4")
+        e4.description = f"".join([f"`{c.name}`, " for c in cmd])
+        e4.set_footer(text=f"Page 5 / {max_page}")
         
-        return [e, e1, e2, e3]
+        return [e, e1, e2, e3, e4]
 
     #help
     @commands.command(name="help", description="ヘルプを表示します", usage="help [command]")
