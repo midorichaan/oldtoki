@@ -52,7 +52,7 @@ class mido_srv(commands.Cog):
             
             if ret:
                 break
-        return key
+        return key.lower()
     
     #on_member_join
     @commands.Cog.listener()
