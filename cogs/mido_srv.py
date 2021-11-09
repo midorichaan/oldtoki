@@ -68,7 +68,7 @@ class mido_srv(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, msg):
         if isinstance(msg.channel, discord.DMChannel):
-            db = await self.bot.db.fetchone("SELECT * FROM verifyqueue WHERE user_id=%s", (member.id,))
+            db = await self.bot.db.fetchone("SELECT * FROM verifyqueue WHERE user_id=%s", (msg.author.id,))
             if not db:
                 return
             
