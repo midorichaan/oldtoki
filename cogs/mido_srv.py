@@ -12,7 +12,7 @@ class mido_srv(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.guild = self.bot.get_guild(891255334109323275)
-        self.verify_role = self.guild.get_role()
+        self.verify_role = self.guild.get_role(907664018444001340)
         
         self.verify_key_log_id = 907640515200163870
         
@@ -72,13 +72,14 @@ class mido_srv(commands.Cog):
             if not db:
                 return
             
+            config = await self.bot.db.fetchone("SELECT * FROM config WHERE guild_id=891255334109323275")
             ctx = await self.bot.get_context(msg)
             if secrets.compare_digest(str(db["verifykey"]), msg.content):
-                await util.reply_or_send(ctx, content="認証に成功しました！")
+                await util.reply_or_send(ctx, content=config["verify_message"] or "認証に成功しました！")
                 await guild.get_member(msg.author.id).add_roles(self.verify_role, reason="complete verification")
                 return await self.bot.db.execute("DELETE FROM verifyqueue WHERE user_id=%s", (msg.author.id,))
             else:
-                return await util.reply_or_send(ctx, content="認証コードが不正です。")
+                return await util.reply_or_send(ctx, content=config["verify_failed_message"] or "認証に失敗しました")
     
     #on_member_remove
     @commands.Cog.listener()
