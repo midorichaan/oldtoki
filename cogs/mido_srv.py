@@ -30,7 +30,7 @@ class mido_srv(commands.Cog):
     def generate_verifykey(self, length: int, type: str="string"):
         if type == "string":
             return "".join(random.choices(string.ascii_letters, k=length))
-        elif type == "code"
+        elif type == "code":
             return "".join(random.choices(string.digits, k=length))
         else:
             return "".join(random.choices(string.ascii_letters + string.digits, k=length))
