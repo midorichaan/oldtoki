@@ -712,16 +712,6 @@ class mido_ticket(commands.Cog):
                                
         channel, message = await self.create_ticket(ctx.guild, ctx.author, reason="unknown")
         
-        overwrite = discord.PermissionOverwrite()
-        overwrite.send_messages = True
-        overwrite.read_messages = True
-        overwrite.add_reactions = True
-        overwrite.embed_links = True
-        overwrite.read_message_history = True
-        overwrite.external_emojis = True
-        overwrite.attach_files = True
-        await ch.set_permissions(ctx.author, overwrite=overwrite)
-        
         await msg.edit(content=f"> チケットを作成しました！ \n→ {channel.mention}")
         
     #ticket create
