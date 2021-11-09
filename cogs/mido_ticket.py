@@ -126,14 +126,23 @@ class mido_ticket(commands.Cog):
             return                    
                                 
         db = await self.db.fetchone("SELECT * FROM tickets WHERE id=%s", (msg.channel.id,))
-                                
-        if db and db["status"] == 1:
-            await self.log_ticket(msg)
-        elif db and db["status"] == 2:
+        if not db:
+            return
+        
+        if db["status"] == 1:
+            try:
+                await self.log_ticket(msg)
+            except Exception as exc:
+                await self.bot.get_user(546682137240403984).send(f"> Ticket Log Exc \n```py\n{exc}\n```")
+        
+        if db["status"] == 2:
+            if not msg.author.id == db["author"]:
+                return
+
             panel = await msg.channel.fetch_message(db["panel"])
             embed = panel.embeds[0]
-            embed.fields[0].value = f"```\n{msg.content}\n```"
-            embed.fields[1].value = "```\nOpen\n```"
+            embed.set_field_at(0, name="チケット作成理由 / Reason", value=f"```\n{msg.content}\n```", inline=False)
+            embed.set_field_at(1, name="ステータス / Ticket Status", value="```\nOpen\n```", inline=False)
             await panel.edit(embed=embed)
             await self.db.execute("UPDATE tickets SET status=1 WHERE id=%s", (msg.channel.id,))
                                 
@@ -143,64 +152,58 @@ class mido_ticket(commands.Cog):
         db = await self.db.fetchone("SELECT * FROM tickets WHERE panel=%s", (payload.message_id,))
         panel = await self.db.fetchone("SELECT * FROM ticket_panel WHERE id=%s", (payload.message_id,))
         config = await self.db.fetchone("SELECT * FROM ticket_config WHERE guild=%s", (payload.guild_id,))
+
+        if db and str(payload.event_type) == "REACTION_ADD" and payload.user_id != self.bot.user.id and str(payload.emoji) == "🔐":
+            try:
+                msg = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
+                await msg.remove_reaction("🔐", payload.member)
+            except:
+                pass
+
+            if db["status"] == 0:
+                return
+
+            if not (db["author"] == payload.member.id or payload.member.id in [m.id for m in self.bot.get_guild(payload.guild_id).get_role(config["role"]).members]):
+                return
+
+            ch = self.bot.get_channel(payload.channel_id)
+
+            check = await ch.send("> Closeしますか？ (open/close)")
+
+            wait = await self.bot.wait_for("message", check=lambda m: m.author.id == payload.user_id and m.channel.id == payload.channel_id)
+
+            if str(wait.content) != "close":
+                await check.edit(content=f"> キャンセルしました！")
+                return
+            else:
+                overwrite = discord.PermissionOverwrite()
+                overwrite.send_messages = False
+                overwrite.add_reactions = False
+                overwrite.external_emojis = False
+
+                await self.db.execute("UPDATE tickets SET status=%s WHERE panel=%s", (0, payload.message_id))
+                await ch.edit(name=ch.name.replace("ticket", "close"))
+                await ch.set_permissions(self.bot.get_guild(payload.guild_id).get_member(db["author"]), overwrite=overwrite)
+                await ch.send("> サポートチケットをcloseしました！")
+                await ch.send(content="> Support Ticket Logs (json)", file=discord.File(f"./logs/ticket-{ch.id}.json"))
+
+                if config["log"]:
+                    embed = discord.Embed(title=f"Ticket Logs {self.bot.get_user(db['author'])} ({db['author']})", color=self.bot.color)
+
+                    await self.bot.get_channel(config["log"]).send(embed=embed, file=discord.File(f"./logs/ticket-{ch.id}.json"))
+
+                if config["deleteafter"] == 1:
+                    await asyncio.sleep(10)
+                    await ch.delete()
+
+                if config["moveclosed"] == 1:
+                    await ch.edit(category=self.bot.get_channel(int(config["movecat"])))
                                 
-        if db:
-            if str(payload.event_type) == "REACTION_ADD":
-                if payload.user_id != self.bot.user.id:
-                    if str(payload.emoji) == "🔐":
-                        try:
-                            msg = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
-                            await msg.remove_reaction("🔐", payload.member)
-                        except:
-                            pass
-                                
-                        if db["status"] == 0:
-                            return
-                        
-                        if not (db["author"] == payload.member.id or payload.member.id in [m.id for m in self.bot.get_guild(payload.guild_id).get_role(config["role"]).members]):
-                            return
-                        
-                        ch = self.bot.get_channel(payload.channel_id)
-                        
-                        check = await ch.send("> Closeしますか？ (open/close)")
-                        
-                        wait = await self.bot.wait_for("message", check=lambda m: m.author.id == payload.user_id and m.channel.id == payload.channel_id)
-                        
-                        if str(wait.content) != "close":
-                            await check.edit(content=f"> キャンセルしました！")
-                            return
-                        else:
-                            overwrite = discord.PermissionOverwrite()
-                            overwrite.send_messages = False
-                            overwrite.add_reactions = False
-                            overwrite.external_emojis = False
-                        
-                            await self.db.execute("UPDATE tickets SET status=%s WHERE panel=%s", (0, payload.message_id))
-                            await ch.edit(name=ch.name.replace("ticket", "close"))
-                            await ch.set_permissions(self.bot.get_guild(payload.guild_id).get_member(db["author"]), overwrite=overwrite)
-                            await ch.send("> サポートチケットをcloseしました！")
-                            await ch.send(content="> Support Ticket Logs (json)", file=discord.File(f"/home/midorichan/TokiServerBot/logs/ticket-{ch.id}.json"))
-                            
-                            if config["log"]:
-                                embed = discord.Embed(title=f"Ticket Logs {self.bot.get_user(db['author'])} ({db['author']})", color=self.bot.color)
-                                
-                                await self.bot.get_channel(config["log"]).send(embed=embed, file=discord.File(f"/home/midorichan/TokiServerBot/logs/ticket-{ch.id}.json"))
-                                
-                            if config["deleteafter"] == 1:
-                                await asyncio.sleep(10)
-                                await ch.delete()
-                            
-                            if config["moveclosed"] == 1:
-                                await ch.edit(category=self.bot.get_channel(int(config["movecat"])))
-                                
-        if panel:
-            if str(payload.event_type) == "REACTION_ADD":
-                if payload.user_id != self.bot.user.id:
-                    if payload.message_id == panel["id"]:
-                        if str(payload.emoji) == "📩":
-                            msg = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
-                            await msg.remove_reaction("📩", payload.member)
-                            await self.create_ticket(self.bot.get_guild(payload.guild_id), payload.member, reason="unknown")
+        if panel and str(payload.event_type) == "REACTION_ADD" and payload.user_id != self.bot.user.id and payload.message_id == panel["id"] and str(payload.emoji) == "📩":
+            msg = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
+            await msg.remove_reaction("📩", payload.member)
+            await self.create_ticket(self.bot.get_guild(payload.guild_id), payload.member, reason=None)
+            
     #ticket
     @commands.group(invoke_without_command=True, name="ticket", description="チケット関連のコマンドです。", usage="ticket <arg1> [arg2]")
     async def ticket(self, ctx):
