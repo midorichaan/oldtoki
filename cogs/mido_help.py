@@ -40,7 +40,7 @@ class mido_help(commands.Cog):
         
         e3 = discord.Embed(title="Help Menu - Admin Commands", description="", color=self.bot.color, timestamp=ctx.message.created_at)
         cmd = self.bot.cogs["mido_admins"].get_commands()
-        cmd.extend(self.bot.get_command("jishaku").command)
+        cmd.append(self.bot.get_command("jishaku"))
         e3.description = f"".join([f"`{c.name}`, " for c in cmd])
         e3.set_footer(text=f"Page 4 / 4")
         
