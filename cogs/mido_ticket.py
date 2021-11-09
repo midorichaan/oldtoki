@@ -36,7 +36,7 @@ class mido_ticket(commands.Cog):
         asyncio.gather(self.db.execute("CREATE TABLE IF NOT EXISTS ticket_log(id BIGINT PRIMARY KEY NOT NULL, channel BIGINT, author BIGINT, content TEXT)"))
     
     #create_ticket
-    async def create_ticket(self, guild, member, reason, *, config=None):
+    async def create_ticket(self, guild, member, *, reason, config=None):
         if config is None:
             config = await self.db.fetchone("SELECT * FROM ticket_config WHERE guild=%s", (guild.id,))
 
@@ -200,7 +200,7 @@ class mido_ticket(commands.Cog):
                         if str(payload.emoji) == "📩":
                             msg = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
                             await msg.remove_reaction("📩", payload.member)
-                            await self.create_ticket(self.bot.get_guild(payload.guild_id), payload.member, "unknown")
+                            await self.create_ticket(self.bot.get_guild(payload.guild_id), payload.member, reason="unknown")
     #ticket
     @commands.group(invoke_without_command=True, name="ticket", description="チケット関連のコマンドです。", usage="ticket <arg1> [arg2]")
     async def ticket(self, ctx):
@@ -699,18 +699,18 @@ class mido_ticket(commands.Cog):
         if isinstance(ctx.channel, discord.DMChannel):
             return await msg.edit(content="> エラー\nDMでは使えないよ！")
         
-        if len(reason) >= 1024:
-            return await msg.edit(content="> エラー\n理由は1024文字以下にしてね！")
-        
         if reason is None:
             reason = "なし"
+        
+        if len(reason) >= 1024:
+            return await msg.edit(content="> エラー\n理由は1024文字以下にしてね！")
         
         db = await self.db.fetchone("SELECT * FROM ticket_config WHERE guild=%s", (ctx.guild.id,))
 
         if not db:
             return await msg.edit(content=f"> エラー \nデータが存在しません。")
                                
-        channel, message = await self.create_ticket(ctx.guild, ctx.author, "unknown")
+        channel, message = await self.create_ticket(ctx.guild, ctx.author, reason="unknown")
         
         overwrite = discord.PermissionOverwrite()
         overwrite.send_messages = True
