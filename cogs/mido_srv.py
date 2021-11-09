@@ -16,7 +16,7 @@ class mido_srv(commands.Cog):
         
         self.verify_key_log_id = 907640515200163870
         
-        asyncio.gather(self.setup_db)
+        asyncio.gather(self.setup_db())
     
     #setup_db
     async def setup_db(self):
