@@ -110,7 +110,7 @@ class mido_srv(commands.Cog):
         c = self.bot.get_command("config")
         
         for i in c.commands:
-            e.add_field(name=c.usage, value=c.description or "なし")
+            e.add_field(name=i.usage, value=i.description or "なし")
         
         await m.edit(content=None, embed=e)
             
