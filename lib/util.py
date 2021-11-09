@@ -69,3 +69,12 @@ async def run_process(ctx, command):
         result = await ctx.bot.loop.run_in_executor(None, process.communicate)
 
     return [output.decode() for output in result]
+
+#is_staff
+async def is_staff(ctx):
+    guild = ctx.bot.get_guild(891255334109323275)
+    if not ctx.guild:
+        return False
+    if not guild.get_member(ctx.author.id):
+        return False
+    return guild.get_role(891967518762237963) in ctx.author.roles
