@@ -28,16 +28,19 @@ class mido_help(commands.Cog):
         
         e1 = discord.Embed(title="Help Menu - Bot Commands", description="", color=self.bot.color, timestamp=ctx.message.created_at)
         cmd = self.bot.cogs["mido_bot"].get_commands()
+        cmd.extend(self.bot.cogs["mido_help"].get_commands())
         e1.description = f"".join([f"`{c.name}`, " for c in cmd])
         e1.set_footer(text=f"Page 2 / 4")
         
-        e2 = discord.Embed(title="Help Menu - MCID Commands", description="", color=self.bot.color, timestamp=ctx.message.created_at)
+        e2 = discord.Embed(title="Help Menu - Minecraft Commands", description="", color=self.bot.color, timestamp=ctx.message.created_at)
         cmd = self.bot.cogs["mido_mcids"].get_commands()
+        cmd.extend(self.bot.cogs["mido_mcs"].get_commands())
         e2.description = f"".join([f"`{c.name}`, " for c in cmd])
         e2.set_footer(text=f"Page 3 / 4")
         
         e3 = discord.Embed(title="Help Menu - Admin Commands", description="", color=self.bot.color, timestamp=ctx.message.created_at)
         cmd = self.bot.cogs["mido_admins"].get_commands()
+        cmd.extend(self.bot.get_command("jishaku"))
         e3.description = f"".join([f"`{c.name}`, " for c in cmd])
         e3.set_footer(text=f"Page 4 / 4")
         
