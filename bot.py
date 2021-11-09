@@ -13,7 +13,7 @@ bot = commands.Bot(command_prefix=config.PREFIX, intents=discord.Intents.all(), 
 bot.config = __import__("config")
 bot.color = config.COLOR
 bot.db = database.Database()
-bot._ext = ["cogs.mido_admins", "cogs.mido_help", "cogs.mido_mcids", "cogs.mido_mcs", "cogs.mido_bot", "jishaku"]
+bot._ext = ["cogs.mido_admins", "cogs.mido_ticket", "cogs.mido_srv", "cogs.mido_help", "cogs.mido_mcids", "cogs.mido_mcs", "cogs.mido_bot", "jishaku"]
 bot.session = aiohttp.ClientSession()
 bot.uptime = datetime.datetime.now()
 bot.logger = logging.getLogger("discord")
