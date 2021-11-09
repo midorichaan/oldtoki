@@ -45,12 +45,14 @@ class mido_srv(commands.Cog):
     
     #get_verify_key
     async def get_verify_key(self):
+        key = ""
         while True:
             key = self.generate_verifykey(4, "string")
             ret = await self.check_verifykey(key)
             
             if ret:
                 break
+        return key
     
     #on_member_join
     @commands.Cog.listener()
