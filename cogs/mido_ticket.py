@@ -2,11 +2,10 @@ import discord
 from discord.ext import commands
 
 import asyncio
-import os
 import json
+import os
 
-from database import Database
-import util
+from lib import util
 
 class ticket_log():
     
@@ -23,7 +22,7 @@ class mido_ticket(commands.Cog):
     
     def __init__(self, bot):
         self.bot = bot
-        self.db = Database(db="risupu_bot")
+        self.db = bot.db
         
         if hasattr(bot, "ticket_log") and isinstance(bot.ticket_log, dict):
             self.ticket_log = bot.ticket_log
@@ -63,7 +62,7 @@ class mido_ticket(commands.Cog):
     
     #create panel
     async def create_panel(self, guild, author, channel, *, reason):
-        e = discord.Embed(title=f"Support Ticket - {author}", color=0x36b8fa)
+        e = discord.Embed(title=f"Support Ticket - {author}", color=self.bot.color)
         e.add_field(name="チケット作成理由 / Reason", value=f"```\n{reason}\n```", inline=False)
         e.add_field(name="ステータス / Ticket Status", value="```\nwait for reason\n```", inline=False)
         
@@ -181,12 +180,12 @@ class mido_ticket(commands.Cog):
                             await ch.edit(name=ch.name.replace("ticket", "close"))
                             await ch.set_permissions(self.bot.get_guild(payload.guild_id).get_member(db["author"]), overwrite=overwrite)
                             await ch.send("> サポートチケットをcloseしました！")
-                            await ch.send(content="> Support Ticket Logs (json)", file=discord.File(f"/home/midorichan/RisuPu-Bot/logs/ticket-{ch.id}.json"))
+                            await ch.send(content="> Support Ticket Logs (json)", file=discord.File(f"/home/midorichan/TokiServerBot/logs/ticket-{ch.id}.json"))
                             
                             if config["log"]:
-                                embed = discord.Embed(title=f"Ticket Logs {self.bot.get_user(db['author'])} ({db['author']})", color=0x36b8fa)
+                                embed = discord.Embed(title=f"Ticket Logs {self.bot.get_user(db['author'])} ({db['author']})", color=self.bot.color)
                                 
-                                await self.bot.get_channel(config["log"]).send(embed=embed, file=discord.File(f"/home/midorichan/RisuPu-Bot/logs/ticket-{ch.id}.json"))
+                                await self.bot.get_channel(config["log"]).send(embed=embed, file=discord.File(f"/home/midorichan/TokiServerBot/logs/ticket-{ch.id}.json"))
                                 
                             if config["deleteafter"] == 1:
                                 await asyncio.sleep(10)
@@ -204,14 +203,14 @@ class mido_ticket(commands.Cog):
                             await msg.remove_reaction("📩", payload.member)
                             await self.create_ticket(self.bot.get_guild(payload.guild_id), payload.member, "unknown")
     #ticket
-    @commands.group(invoke_without_command=True, name="ticket", description="チケット関連のコマンドです。", usage="rsp!ticket <arg1> [arg2]")
+    @commands.group(invoke_without_command=True, name="ticket", description="チケット関連のコマンドです。", usage="ticket <arg1> [arg2]")
     async def ticket(self, ctx):
         pass
     
     #ticket help
-    @ticket.command(name="help", description="チケットのヘルプを表示します。", usage="rsp!ticket help")
+    @ticket.command(name="help", description="チケットのヘルプを表示します。", usage="ticket help")
     async def help(self, ctx):
-        e = discord.Embed(title="Support - ticket", color=0x36b8fa, timestamp=ctx.message.created_at)
+        e = discord.Embed(title="Support - ticket", color=self.bot.color, timestamp=ctx.message.created_at)
         e.add_field(name="help", value="チケットシステムのヘルプを表示します。")
         e.add_field(name="create [reason]", value="サポートチケットを作成します。")
         e.add_field(name="reopen <channel>", value="サポートチケットを再度オープンします。")
@@ -226,10 +225,10 @@ class mido_ticket(commands.Cog):
         await ctx.send(embed=e)
 
     #ticket adduser
-    @ticket.command(name="adduser", description="チケットにユーザーを追加します。", usage="rsp!ticket adduser <member> [channel]", brief="サポート係以上")
-    @commands.check(util.is_support)
+    @ticket.command(name="adduser", description="チケットにユーザーを追加します。", usage="ticket adduser <member> [channel]")
+    @commands.check(util.is_staff)
     async def adduser(self, ctx, member:commands.MemberConverter=None, channel:commands.TextChannelConverter=None):
-        e = discord.Embed(title="Ticket - adduser", description="処理中....", color=0x36b8fa, timestamp=ctx.message.created_at)
+        e = discord.Embed(title="Ticket - adduser", description="処理中....", color=self.bot.color, timestamp=ctx.message.created_at)
         msg = await ctx.send(embed=e)
                                 
         if isinstance(ctx.channel, discord.DMChannel):
@@ -270,10 +269,10 @@ class mido_ticket(commands.Cog):
             return await msg.edit(embed=e)
                                
     #ticket removeuser
-    @ticket.command(name="removeuser", aliases=["deluser"], description="チケットからユーザーを削除します。", usage="rsp!ticket removeuser <member> [channel] | rsp!ticket deluser <member> [channel]", brief="サポート係以上")
-    @commands.check(util.is_support)
+    @ticket.command(name="removeuser", aliases=["deluser"], description="チケットからユーザーを削除します。", usage="ticket removeuser <member> [channel] | ticket deluser <member> [channel]")
+    @commands.check(util.is_staff)
     async def removeuser(self, ctx, member:commands.MemberConverter=None, channel:commands.TextChannelConverter=None):
-        e = discord.Embed(title="Ticket - removeuser", description="処理中....", color=0x36b8fa, timestamp=ctx.message.created_at)
+        e = discord.Embed(title="Ticket - removeuser", description="処理中....", color=self.bot.color, timestamp=ctx.message.created_at)
         msg = await ctx.send(embed=e)
 
         if isinstance(ctx.channel, discord.DMChannel):
@@ -305,10 +304,10 @@ class mido_ticket(commands.Cog):
             return await msg.edit(embed=e)
 
     #ticket deletepanel
-    @ticket.command(name="deletepanel", aliases=["delpanel"], description="チケットパネルを削除します。", usage="rsp!ticket deletepanel <panel_id> | rsp!ticket delpanel <panel_id>", brief="サポート係以上")
-    @commands.check(util.is_support)
+    @ticket.command(name="deletepanel", aliases=["delpanel"], description="チケットパネルを削除します。", usage="ticket deletepanel <panel_id> | ticket delpanel <panel_id>")
+    @commands.check(util.is_staff)
     async def deletepanel(self, ctx, panel_id:int=None):
-        e = discord.Embed(title="Ticket - deletepanel", description="処理中...", color=0x36b8fa, timestamp=ctx.message.created_at)
+        e = discord.Embed(title="Ticket - deletepanel", description="処理中...", color=self.bot.color, timestamp=ctx.message.created_at)
         msg = await ctx.send(embed=e)
         
         if isinstance(ctx.channel, discord.DMChannel):
@@ -339,10 +338,10 @@ class mido_ticket(commands.Cog):
             return await msg.edit(embed=e)
     
     #ticket panel
-    @ticket.command(name="panel", aliases=["addpanel"], description="チケットパネルを作成します。", usage="rsp!ticket panel [channel] | rsp!ticket addpanel [channel]", brief="サポート係以上")
-    @commands.check(util.is_support)
+    @ticket.command(name="panel", aliases=["addpanel"], description="チケットパネルを作成します。", usage="ticket panel [channel] | ticket addpanel [channel]")
+    @commands.check(util.is_staff)
     async def panel(self, ctx, channel:commands.TextChannelConverter=None):
-        e = discord.Embed(title="Ticket - panel", description="処理中...", color=0x36b8fa, timestamp=ctx.message.created_at)
+        e = discord.Embed(title="Ticket - panel", description="処理中...", color=self.bot.color, timestamp=ctx.message.created_at)
         msg = await ctx.send(embed=e)
         
         if isinstance(ctx.channel, discord.DMChannel):
@@ -368,7 +367,7 @@ class mido_ticket(commands.Cog):
             e.add_field(name="エラー", value="すでにパネルが存在するよ！")
             return await msg.edit(embed=e)
         else:
-            panel = discord.Embed(title="Support Ticket Panel", description="📩 をクリックすることでサポートチケットを発行します。", color=0x36b8fa)
+            panel = discord.Embed(title="Support Ticket Panel", description="📩 をクリックすることでサポートチケットを発行します。", color=self.bot.color)
             m = await channel.send(embed=panel)
             await m.add_reaction("📩")
 
@@ -379,10 +378,10 @@ class mido_ticket(commands.Cog):
             return await msg.edit(embed=e)
     
     #ticket config
-    @ticket.group(name="config", description="チケットの設定を変更します。", usage="rsp!ticket config <arg1> [arg2]", brief="サポート係以上")
-    @commands.check(util.is_support)
+    @ticket.group(name="config", description="チケットの設定を変更します。", usage="ticket config <arg1> [arg2]")
+    @commands.check(util.is_staff)
     async def config(self, ctx):
-        e = discord.Embed(title="Ticket - config", color=0x36b8fa, timestamp=ctx.message.created_at)
+        e = discord.Embed(title="Ticket - config", color=self.bot.color, timestamp=ctx.message.created_at)
         
         if ctx.invoked_subcommand is None:
             e.add_field(name="config category <category>", value="サポートチケットのカテゴリを変更します。")
@@ -395,10 +394,10 @@ class mido_ticket(commands.Cog):
             await ctx.send(embed=e)
     
     #ticket config moveto
-    @config.command(name="moveto", description="チケットをクローズ後に移動するカテゴリを設定します。", usage="rsp!ticket config moveto <category>", brief="サポート係以上")
-    @commands.check(util.is_support)
+    @config.command(name="moveto", description="チケットをクローズ後に移動するカテゴリを設定します。", usage="ticket config moveto <category>")
+    @commands.check(util.is_staff)
     async def moveto(self, ctx, category:commands.CategoryChannelConverter=None):
-        e = discord.Embed(title="Config - moveto", description="処理中...", color=0x26b8fa, timestamp=ctx.message.created_at)
+        e = discord.Embed(title="Config - moveto", description="処理中...", color=self.bot.color, timestamp=ctx.message.created_at)
         msg = await ctx.send(embed=e)
 
         if isinstance(ctx.channel, discord.DMChannel):
@@ -420,14 +419,14 @@ class mido_ticket(commands.Cog):
             return await msg.edit(embed=e)
         else:
             e.description = None
-            e.add_field(name="エラー", value="データが存在しません。インフラ担当課DB係に連絡してください。")
+            e.add_field(name="エラー", value="データが存在しません。")
             return await msg.edit(embed=e)
 
     #ticket config moveclosed
-    @config.command(name="moveclosed", description="チケットをクローズ後にカテゴリを移動するか設定します。", usage="rsp!ticket config moveclosed <True/False>", brief="サポート係以上")
-    @commands.check(util.is_support)
+    @config.command(name="moveclosed", description="チケットをクローズ後にカテゴリを移動するか設定します。", usage="ticket config moveclosed <True/False>")
+    @commands.check(util.is_staff)
     async def moveclosed(self, ctx, value:bool=None):
-        e = discord.Embed(title="Config - moveclosed", description="処理中...", color=0x26b8fa, timestamp=ctx.message.created_at)
+        e = discord.Embed(title="Config - moveclosed", description="処理中...", color=self.bot.color, timestamp=ctx.message.created_at)
         msg = await ctx.send(embed=e)
 
         if isinstance(ctx.channel, discord.DMChannel):
@@ -449,14 +448,14 @@ class mido_ticket(commands.Cog):
             return await msg.edit(embed=e)
         else:
             e.description = None
-            e.add_field(name="エラー", value="データが存在しません。インフラ担当課DB係に連絡してください。")
+            e.add_field(name="エラー", value="データが存在しません。")
             return await msg.edit(embed=e)
                                 
     #ticket config mention
-    @config.command(name="mention", description="チケット作成時に指定ロールにメンションするかを設定します。", usage="rsp!ticket config mention <on/off>", brief="サポート係以上")
-    @commands.check(util.is_support)
+    @config.command(name="mention", description="チケット作成時に指定ロールにメンションするかを設定します。", usage="ticket config mention <on/off>")
+    @commands.check(util.is_staff)
     async def mention(self, ctx, mention:bool=None):
-        e = discord.Embed(title="Config - mention", description="処理中...", color=0x26b8fa, timestamp=ctx.message.created_at)
+        e = discord.Embed(title="Config - mention", description="処理中...", color=self.bot.color, timestamp=ctx.message.created_at)
         msg = await ctx.send(embed=e)
 
         if isinstance(ctx.channel, discord.DMChannel):
@@ -478,14 +477,14 @@ class mido_ticket(commands.Cog):
             return await msg.edit(embed=e)
         else:
             e.description = None
-            e.add_field(name="エラー", value="データが存在しません。インフラ担当課DB係に連絡してください。")
+            e.add_field(name="エラー", value="データが存在しません。")
             return await msg.edit(embed=e)
 
     #ticket config role
-    @config.command(name="role", description="チケット発行時にメンションする役職を設定します。", usage="rsp!ticket config role <role>", brief="サポート係以上")
-    @commands.check(util.is_support)
+    @config.command(name="role", description="チケット発行時にメンションする役職を設定します。", usage="ticket config role <role>")
+    @commands.check(util.is_staff)
     async def role(self, ctx, role:commands.RoleConverter=None):
-        e = discord.Embed(title="Config - role", description="処理中...", color=0x26b8fa, timestamp=ctx.message.created_at)
+        e = discord.Embed(title="Config - role", description="処理中...", color=self.bot.color, timestamp=ctx.message.created_at)
         msg = await ctx.send(embed=e)
 
         if isinstance(ctx.channel, discord.DMChannel):
@@ -507,14 +506,14 @@ class mido_ticket(commands.Cog):
             return await msg.edit(embed=e)
         else:
             e.description = None
-            e.add_field(name="エラー", value="データが存在しません。インフラ担当課DB係に連絡してください。")
+            e.add_field(name="エラー", value="データが存在しません。")
             return await msg.edit(embed=e)
     
     #ticket config category
-    @config.command(name="category", description="チケット発行時にどのカテゴリにチャンネルを作成するかを設定します。", usage="rsp!ticket config category <category>", brief="サポート係以上")
-    @commands.check(util.is_support)
+    @config.command(name="category", description="チケット発行時にどのカテゴリにチャンネルを作成するかを設定します。", usage="ticket config category <category>")
+    @commands.check(util.is_staff)
     async def category(self, ctx, category:commands.CategoryChannelConverter=None):
-        e = discord.Embed(title="Config - category", description="処理中...", color=0x26b8fa, timestamp=ctx.message.created_at)
+        e = discord.Embed(title="Config - category", description="処理中...", color=self.bot.color, timestamp=ctx.message.created_at)
         msg = await ctx.send(embed=e)
 
         if isinstance(ctx.channel, discord.DMChannel):
@@ -536,14 +535,14 @@ class mido_ticket(commands.Cog):
             return await msg.edit(embed=e)
         else:
             e.description = None
-            e.add_field(name="エラー", value="データが存在しません。インフラ担当課DB係に連絡してください。")
+            e.add_field(name="エラー", value="データが存在しません。")
             return await msg.edit(embed=e)
                                                       
     #ticket config channel
-    @config.command(name="log", description="チケットクローズ後にjsonのログを送信するチャンネルを設定します。", usage="rsp!ticket config log <channel>", brief="サポート係以上")
-    @commands.check(util.is_support)
+    @config.command(name="log", description="チケットクローズ後にjsonのログを送信するチャンネルを設定します。", usage="ticket config log <channel>")
+    @commands.check(util.is_staff)
     async def log(self, ctx, channel:commands.TextChannelConverter=None):
-        e = discord.Embed(title="Config - log", description="処理中...", color=0x26b8fa, timestamp=ctx.message.created_at)
+        e = discord.Embed(title="Config - log", description="処理中...", color=self.bot.color, timestamp=ctx.message.created_at)
         msg = await ctx.send(embed=e)
 
         if isinstance(ctx.channel, discord.DMChannel):
@@ -565,14 +564,14 @@ class mido_ticket(commands.Cog):
             return await msg.edit(embed=e)
         else:
             e.description = None
-            e.add_field(name="エラー", value="データが存在しません。インフラ担当課DB係に連絡してください。")
+            e.add_field(name="エラー", value="データが存在しません。")
             return await msg.edit(embed=e)
                            
     #ticket config delafter
-    @config.command(name="delafter", description="チケットクローズ後にチケットを削除するかを設定します。", usage="rsp!ticket config delafter <True/False>", brief="サポート係以上")
-    @commands.check(util.is_support)
+    @config.command(name="delafter", description="チケットクローズ後にチケットを削除するかを設定します。", usage="ticket config delafter <True/False>")
+    @commands.check(util.is_staff)
     async def delafter(self, ctx, bool:bool=None):
-        e = discord.Embed(title="Config - delafter", description="処理中...", color=0x26b8fa, timestamp=ctx.message.created_at)
+        e = discord.Embed(title="Config - delafter", description="処理中...", color=self.bot.color, timestamp=ctx.message.created_at)
         msg = await ctx.send(embed=e)
 
         if isinstance(ctx.channel, discord.DMChannel):
@@ -594,11 +593,11 @@ class mido_ticket(commands.Cog):
             return await msg.edit(embed=e)
         else:
             e.description = None
-            e.add_field(name="エラー", value="データが存在しません。インフラ担当課DB係に連絡してください。")
+            e.add_field(name="エラー", value="データが存在しません。")
             return await msg.edit(embed=e)
     
     #ticket close
-    @ticket.command(name="close", description="チケットをクローズします。", usage="rsp!ticket close")
+    @ticket.command(name="close", description="チケットをクローズします。", usage="ticket close")
     async def _close(self, ctx):
         msg = await ctx.send("> 処理中...")
         
@@ -630,12 +629,12 @@ class mido_ticket(commands.Cog):
                     await ctx.channel.set_permissions(self.bot.get_user(db["author"]), overwrite=overwrite)
                     await self.db.execute("UPDATE tickets SET status=%s WHERE id=%s", (1, ctx.channel.id))
                     await msg.edit(content="> サポートチケットをcloseしました！")
-                    await ctx.send(content="> Support Ticket Logs (json)", file=discord.File(f"/home/midorichan/RisuPu-Bot/logs/ticket-{ctx.channel.id}.json"))
+                    await ctx.send(content="> Support Ticket Logs (json)", file=discord.File(f"/home/midorichan/TokiServerBot/logs/ticket-{ctx.channel.id}.json"))
                     
                     if config["log"]:
                         embed = discord.Embed(title=f"Ticket Logs {self.bot.get_user(db['author'])} ({db['author']})", color=0x36b8fa)
                                 
-                        await self.bot.get_channel(config["log"]).send(embed=embed, file=discord.File(f"/home/midorichan/RisuPu-Bot/logs/ticket-{ctx.channel.id}.json"))
+                        await self.bot.get_channel(config["log"]).send(embed=embed, file=discord.File(f"/home/midorichan/TokiServerBot/logs/ticket-{ctx.channel.id}.json"))
                                               
                     if config["deleteafter"] == 1:
                         await asyncio.sleep(10)
@@ -649,7 +648,7 @@ class mido_ticket(commands.Cog):
             await msg.edit(content=f"> エラー\nこのチャンネルはサポートチケットじゃないよ！")
     
     #ticket reopen
-    @ticket.command(name="reopen", description="クローズ済みのチケットを再度オープンします。", usage="rsp!ticket reopen <channel>")
+    @ticket.command(name="reopen", description="クローズ済みのチケットを再度オープンします。", usage="ticket reopen <channel>")
     async def reopen(self, ctx, channel:commands.TextChannelConverter=None):
         msg = await ctx.send("> 処理中...")
                                 
@@ -694,7 +693,7 @@ class mido_ticket(commands.Cog):
             return await msg.edit(content="> エラー \nそのチケットチャンネルは作成者または、運営のみが再オープンできます。")
                                   
     #ticket create
-    @ticket.command(name="create", description="チケットを発行します。", usage="rsp!ticket create [reason]")
+    @ticket.command(name="create", description="チケットを発行します。", usage="ticket create [reason]")
     async def create(self, ctx, *, reason:str=None):
         msg = await ctx.send("> 処理中...")
         
@@ -710,7 +709,7 @@ class mido_ticket(commands.Cog):
         db = await self.db.fetchone("SELECT * FROM ticket_config WHERE guild=%s", (ctx.guild.id,))
 
         if not db:
-            return await msg.edit(content=f"> エラー \nデータが存在しません。インフラ担当課DB係に連絡してください。")
+            return await msg.edit(content=f"> エラー \nデータが存在しません。")
                                
         channel, message = await self.create_ticket(ctx.guild, ctx.author, "unknown")
         
@@ -727,7 +726,8 @@ class mido_ticket(commands.Cog):
         await msg.edit(content=f"> チケットを作成しました！ \n→ {channel.mention}")
         
     #ticket create
-    @ticket.command(name="register", description="チャンネルをチケット扱いにします。", usage="rsp!ticket register [channel]")
+    @ticket.command(name="register", description="チャンネルをチケット扱いにします。", usage="ticket register [channel]")
+    @commands.check(util.is_staff)
     async def register(self, ctx, *, channel:commands.TextChannelConverter=None):
         msg = await ctx.send("> 処理中...")
         
