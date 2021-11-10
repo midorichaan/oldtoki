@@ -65,6 +65,26 @@ class mido_invite(commands.Cog):
     @commands.Cog.listener()
     async def on_invite_create(self, invite):
         await self.bot.db.execute("INSERT INTO invitecache VALUES(%s, %s, %s)", (invite.guild.id, invite.code, 0))
+    
+    #on_member_join
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        try:
+            invite = await member.guild.invites()
+        except Exception as exc:
+            e = discord.Embed(title="Exception Info", description=f"```py\n{exc}\n```", color=self.bot.color, timestamp=datetime.datetime.now())
+            return await self.bot.get_channel(self.bot.config.LOG_CHANNEL).send(embed=e)
+        else:
+            db = await self.bot.db.fetchall("SELECT * FROM invitecache")
+            d = {}
+            for i in db:
+                d[i["code"]] = i["used"]
+            
+            for i in invite:
+                if i.uses > d[i.code]:
+                    await self.bot.db.execute("UPDATE invites SET used=%s WHERE code=%s", (i.uses, i.code))
+                    await self.bot.db.execute("UPDATE invitecache SET used=%s WHERE code=%s", (i.uses, i.code))
+                    break
         
 def setup(bot):
     bot.add_cog(mido_invite(bot))
