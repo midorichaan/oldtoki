@@ -17,6 +17,8 @@ class mido_invite(commands.Cog):
         
         if not "invites" in tables:
             await self.bot.db.execute("CREATE TABLE IF NOT EXISTS invites(user_id BIGINT, code TEXT, used INT)")
+        if not "invitecache" in tables:
+            await self.bot.db.execute("CREATE TABBLE IF NOT EXISTS invitecache(guild_id BIGINT, code TEXT, used INT)")
     
     #create_invite
     async def create_invite(self, ctx, *, channel=None):
@@ -51,10 +53,8 @@ class mido_invite(commands.Cog):
     @commands.Cog.listener()
     async def on_invite_delete(self, invite):
         db = await self.bot.db.fetchone("SELECT * FROM invites WHERE code=%s", (invite.code,))
-        if not db:
-            return
+        cache = await self.bot.db.fetchone("SELECT * FROM invitecache WHERE code=%s", (invite.code,))
         
-        await self.bot.db.execute("DELETE FROM invites WHERE code=%s", (invite.code,))
-
+        
 def setup(bot):
     bot.add_cog(mido_invite(bot))
