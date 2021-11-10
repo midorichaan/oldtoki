@@ -42,6 +42,7 @@ class mido_help(commands.Cog):
         e3 = discord.Embed(title="Help Menu - Server Commands", description="", color=self.bot.color, timestamp=ctx.message.created_at)
         cmd = self.bot.cogs["mido_ticket"].get_commands()
         cmd.extend(self.bot.cogs["mido_srv"].get_commands())
+        cmd.extend(self.bot.cogs["mido_invite"].get_commands())
         e3.description = f"".join([f"`{c.name}`, " for c in cmd])
         e3.set_footer(text=f"Page 4 / {max_page}")
         
