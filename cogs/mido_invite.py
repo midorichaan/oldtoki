@@ -55,6 +55,16 @@ class mido_invite(commands.Cog):
         db = await self.bot.db.fetchone("SELECT * FROM invites WHERE code=%s", (invite.code,))
         cache = await self.bot.db.fetchone("SELECT * FROM invitecache WHERE code=%s", (invite.code,))
         
+        if db:
+            await self.bot.db.execute("DELETE FROM invites WHERE code=%s", (invite.code,))
+        
+        if cache:
+            await self.bot.db.execute("DELETE FROM invitecache WHERE code=%s", (invite.code,))
+    
+    #on_invite_create
+    @commands.Cog.listener()
+    async def on_invite_create(self, invite):
+        await self.bot.db.execute("INSERT INTO invitecache VALUES(%s, %s, %s)", (invite.guild.id, invite.code, 0))
         
 def setup(bot):
     bot.add_cog(mido_invite(bot))
