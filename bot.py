@@ -47,7 +47,7 @@ async def on_ready():
         else:
             print(f"[System] {name} load")
     
-    await bot.change_presence(activity=discord.Game(name="Toki DiscordServer Bot | ©Midorichan"))
+    await bot.change_presence(activity=discord.Game(name="とき鯖でのんびりお仕事ちう>< | ©midorichan"))
     print("[System] on_ready!")
 
 #command_log
