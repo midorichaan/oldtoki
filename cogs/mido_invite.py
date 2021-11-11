@@ -42,7 +42,7 @@ class mido_invite(commands.Cog):
         if db:
             return await m.edit(content=f"> すでに招待URLがあるよ！ \n→ discord.gg/{db['code']} (使用回数: {db['used']})")
         
-        invite = await self.create_invite()
+        invite = await self.create_invite(ctx)
         if not invite:
             return await m.edit(content=f"> コードの作成ができなかったよ...")
         
