@@ -34,6 +34,45 @@ class MinecraftConverter:
                 else:
                     raise ValueError("UUIDの検証中にエラーが発生しました")
 
+#clear_reactions
+async def clear_reactions(message):
+    try:
+        await message.clear_reactions()
+    except:
+        pass
+
+#wait_for_check
+async def wait_for_check(ctx, *, message=None, timeout: float=30.0, type: str="reaction"):
+    if not message:
+        message = ctx.message
+    
+    if type == "reaction":
+        await message.add_reaction("✅")
+        await message.add_reaction("❌")
+        
+        try:
+            r, u = await ctx.bot.wait_for("reaction_add", check=lambda r, u: u.id == ctx.author.id and r.message.id == message.id, timeout=timeout)
+        except Exception as exc:
+            await clear_reactions(message) 
+            raise exc
+        else:
+            if r.emoji == "✅":
+                await clear_reactions(message)
+                return True
+            elif r.emoji == "❌":
+                await clear_reactions(message)
+                return False
+    else:
+        try:
+            m = await ctx.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.id == message.id, timeout=timeout)
+        except Exception as exc:
+            raise exc
+        else:
+            if m.content in ["yes", "y", "はい", "true", "on", "True"]:
+                return True
+            elif m.content in ["no", "n", "いいえ", "false", "off", "False"]:
+                return False
+                    
 #resolve_mcid
 async def resolve_mcid(ctx, *, mcid):
     cls = MinecraftConverter()
