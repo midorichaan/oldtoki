@@ -42,12 +42,21 @@ class mido_invite(commands.Cog):
         if db:
             return await m.edit(content=f"> すでに招待URLがあるよ！ \n→ discord.gg/{db['code']} (使用回数: {db['used']})")
         
-        invite = await self.create_invite(ctx)
-        if not invite:
-            return await m.edit(content=f"> コードの作成ができなかったよ...")
+        await m.edit(content="> 招待URLを作成しますか？")
+        try:
+            r = await util.wait_for_check(ctx, message=m, timeout=15.0, type="reaction")
+        except Exception as exc:
+            return await m.edit(content=f"> エラー \n```py\n{exc}\n```")
+        else:
+            if r == False:
+                return await m.edit(content="> キャンセルしたよ！")
+                
+            invite = await self.create_invite(ctx)
+            if not invite:
+                return await m.edit(content=f"> コードの作成ができなかったよ...")
         
-        await self.bot.db.execute("INSERT INTO invites VALUES(%s, %s, %s)", (ctx.author.id, invite.code, 0))
-        return await m.edit(content=f"> 招待URLを作成したよ！ \n→ discord.gg/{invite.code}")
+            await self.bot.db.execute("INSERT INTO invites VALUES(%s, %s, %s)", (ctx.author.id, invite.code, 0))
+            return await m.edit(content=f"> 招待URLを作成したよ！ \n→ discord.gg/{invite.code}")
     
     #on_invite_delete
     @commands.Cog.listener()
