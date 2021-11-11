@@ -18,7 +18,7 @@ class mido_invite(commands.Cog):
         if not "invites" in tables:
             await self.bot.db.execute("CREATE TABLE IF NOT EXISTS invites(user_id BIGINT, code TEXT, used INT)")
         if not "invitecache" in tables:
-            await self.bot.db.execute("CREATE TABBLE IF NOT EXISTS invitecache(guild_id BIGINT, code TEXT, used INT)")
+            await self.bot.db.execute("CREATE TABLE IF NOT EXISTS invitecache(guild_id BIGINT, code TEXT, used INT)")
     
     #create_invite
     async def create_invite(self, ctx, *, channel=None):
