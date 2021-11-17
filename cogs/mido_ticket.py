@@ -17,6 +17,7 @@ class ticket_log():
         self.created_at = msg.created_at
         self.embeds = [e.to_dict() for e in msg.embeds if msg.embeds]
         self.attachments = [a.proxy_url for a in msg.attachments if msg.attachments]
+        self.message_raw = msg
 
 class mido_ticket(commands.Cog):
     
