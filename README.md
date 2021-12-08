@@ -1,2 +1,2 @@
-# TokiServerBot
+# toki
 とき鯖のDiscordBot
